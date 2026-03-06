@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Lớp 6 SIU VIP PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    /* Giao diện kính mờ (Glassmorphism) */
+    .container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+        padding: 40px 30px;
+        border-radius: 20px;
+        width: 700px;
+        max-width: 95%;
+        text-align: center;
+        animation: fadeIn 0.8s ease-out;
+        position: relative;
+    }
+
+    h2 { margin-top: 0; color: #00d2ff; text-transform: uppercase; letter-spacing: 2px; }
+    h3 { font-weight: 400; margin-bottom: 20px; }
+
+    /* Nút bấm chung */
+    button {
+        width: 100%;
+        padding: 15px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    button:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    button:active:not(:disabled) { transform: translateY(1px); }
+
+    /* Nút menu môn học */
+    .btn-subject { background: linear-gradient(45deg, #11998e, #38ef7d); border: none; }
+    .btn-subject:nth-child(2) { background: linear-gradient(45deg, #2980B9, #6DD5FA); }
+    .btn-subject:nth-child(3) { background: linear-gradient(45deg, #8E2DE2, #4A00E0); }
+    .btn-subject:hover { filter: brightness(1.2); }
+
+    /* Trạng thái đáp án */
+    .correct { background: linear-gradient(45deg, #11998e, #38ef7d) !important; color: white !important; border-color: transparent !important; animation: pulse 0.5s; }
+    .wrong { background: linear-gradient(45deg, #cb2d3e, #ef473a) !important; color: white !important; border-color: transparent !important; opacity: 0.8; }
+    button:disabled { cursor: not-allowed; }
+
+    #next {
+        background: linear-gradient(45deg, #f12711, #f5af19);
+        display: none;
+        margin-top: 20px;
+        border: none;
+    }
+
+    /* Tiện ích (Timer, Stats) */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    
+    #timer { font-size: 22px; font-weight: bold; color: #ffeb3b; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; }
+    
+    .stat { font-size: 14px; color: #aaa; margin-bottom: 20px; }
+    .stat span { color: #00d2ff; font-weight: bold; font-size: 18px; }
+
+    input {
+        width: 100%; padding: 15px; border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.2); color: white;
+        margin-bottom: 20px; font-size: 16px; outline: none; text-align: center;
+    }
+    input::placeholder { color: #aaa; }
+    input:focus { border-color: #00d2ff; background: rgba(0,0,0,0.4); }
+
+    /* Bảng xếp hạng */
+    .rank-board { text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 10px; }
+    .rank-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-1 { color: #FFD700; font-weight: bold; }
+    .rank-2 { color: #C0C0C0; font-weight: bold; }
+    .rank-3 { color: #CD7F32; font-weight: bold; }
+
+    /* Progress Bar */
+    .progress-container { width: 100%; background: rgba(255,255,255,0.1); height: 8px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+    .progress-bar { height: 100%; background: #00d2ff; width: 0%; transition: width 0.4s ease; }
+
+    /* Mute Button */
+    #muteBtn { background: transparent; border: none; font-size: 24px; cursor: pointer; width: auto; padding: 5px; position: absolute; top: 15px; right: 20px; color: white; }
+    #muteBtn:hover { background: transparent; transform: scale(1.1); box-shadow: none; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    .slide-in { animation: fadeIn 0.4s ease-out; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <button id="muteBtn" onclick="toggleMute()">🔊</button>
+    <h2>🎓 Quiz Siu Vip Pro</h2>
+
+    <div id="menu">
+        <div class="stat">Tổng câu đúng vĩnh viễn: <span id="totalCorrect">0</span></div>
+        <input id="player" placeholder="Nhập tên của bạn (Tên ngầu xíu nhé 😎)">
+        
+        <h3 style="margin-top: 30px;">Chọn Môn Học Thử Thách</h3>
+        <button class="btn-subject" onclick="start('math')">🧮 Toán Học (Auto Gen)</button>
+        <button class="btn-subject" onclick="start('english')">🇬🇧 Tiếng Anh</button>
+        <button class="btn-subject" onclick="start('science')">🔬 Khoa Học</button>
+
+        <h3 style="margin-top: 30px;">🏆 Bảng Phong Thần</h3>
+        <div class="rank-board" id="ranking"></div>
+    </div>
+
+    <div id="game" style="display:none">
+        <div class="top-bar">
+            <span id="questionCount" style="color:#aaa; font-weight: bold;">Câu 1/10</span>
+            <div id="timer">⏱ 15</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <h3 id="question" class="slide-in"></h3>
+        <div id="answers" class="slide-in"></div>
+        
+        <button id="next">Tiếp Tục 🚀</button>
+    </div>
+</div>
+
+<script>
+// --- ÂM THANH ---
+const correctSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b8b2c.mp3");
+const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_8c8f5b84de.mp3");
+let isMuted = false;
+
+function toggleMute() {
+    isMuted = !isMuted;
+    correctSound.muted = isMuted;
+    wrongSound.muted = isMuted;
+    document.getElementById("muteBtn").innerText = isMuted ? "🔇" : "🔊";
+}
+
+// --- DỮ LIỆU CÂU HỎI ---
+function generateMath(){
+    let arr = [];
+    for(let i=0; i<200; i++){
+        let a = Math.floor(Math.random()*50) + 1;
+        let b = Math.floor(Math.random()*50) + 1;
+        let correct = a + b;
+        arr.push({ q: `${a} + ${b} = ?`, correctAns: correct, wrongAns: [correct+1, correct-1, correct+2] });
+    }
+    return arr;
+}
+
+// Định dạng dữ liệu mới cho dễ xáo trộn: {q: "Câu hỏi", correctAns: "Đúng", wrongAns: ["Sai 1", "Sai 2", "Sai 3"]}
+const rawBank = {
+    math: generateMath(),
+    english: [
+        { q: "Hello nghĩa là gì?", correctAns: "Xin chào", wrongAns: ["Tạm biệt", "Cảm ơn", "Xin lỗi"] },
+        { q: "Dog nghĩa là gì?", correctAns: "Chó", wrongAns: ["Mèo", "Cá", "Chim"] },
+        { q: "Apple nghĩa là gì?", correctAns: "Quả Táo", wrongAns: ["Quả Chuối", "Quả Cam", "Quả Đào"] },
+        { q: "Book nghĩa là gì?", correctAns: "Quyển sách", wrongAns: ["Cái bút", "Cái bàn", "Cái ghế"] },
+        { q: "Water nghĩa là gì?", correctAns: "Nước", wrongAns: ["Lửa", "Đất", "Gió"] }
+    ],
+    science: [
+        { q: "Nước có công thức hóa học là?", correctAns: "H2O", wrongAns: ["CO2", "O2", "NaCl"] },
+        { q: "Hành tinh gần Mặt Trời nhất?", correctAns: "Sao Thủy", wrongAns: ["Sao Kim", "Sao Hỏa", "Trái Đất"] },
+        { q: "Động vật lớn nhất thế giới hiện nay?", correctAns: "Cá voi xanh", wrongAns: ["Voi", "Hươu cao cổ", "Khủng long"] },
+        { q: "Mặt trời mọc ở hướng nào?", correctAns: "Hướng Đông", wrongAns: ["Hướng Tây", "Hướng Nam", "Hướng Bắc"] },
+        { q: "Chất khí nào duy trì sự cháy?", correctAns: "Oxy (O2)", wrongAns: ["Cacbonic (CO2)", "Nito (N2)", "Heli (He)"] }
+    ]
+};
+
+// --- LOGIC GAME ---
+let quiz = [];
+let index = 0;
+let score = 0;
+let player = "";
+let timer;
+let time = 15;
+
+// Hàm chuẩn bị & xáo trộn đáp án an toàn
+function prepareQuestions(subject) {
+    let questions = [...rawBank[subject]].sort(() => 0.5 - Math.random()).slice(0, 10);
+    return questions.map(item => {
+        let options = [item.correctAns, ...item.wrongAns];
+        options.sort(() => 0.5 - Math.random()); // Xáo trộn đáp án
+        return {
+            q: item.q,
+            a: options,
+            c: options.indexOf(item.correctAns) // Tìm lại index của đáp án đúng
+        };
+    });
+}
+
+function start(subject){
+    player = document.getElementById("player").value.trim() || "Người chơi ẩn danh";
+    quiz = prepareQuestions(subject);
+    
+    // Đảm bảo có ít nhất 1 câu hỏi
+    if(quiz.length === 0) {
+        alert("Chưa có dữ liệu câu hỏi cho môn này!"); return;
+    }
+
+    index = 0; score = 0;
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    load();
+}
+
+function load(){
+    let q = quiz[index];
+    
+    // Cập nhật UI
+    document.getElementById("questionCount").innerText = `Câu ${index + 1}/${quiz.length}`;
+    document.getElementById("progressBar").style.width = `${((index) / quiz.length) * 100}%`;
+    
+    // Animation reset
+    let qEl = document.getElementById("question");
+    let aEl = document.getElementById("answers");
+    qEl.classList.remove("slide-in"); aEl.classList.remove("slide-in");
+    void qEl.offsetWidth; // Trigger reflow
+    qEl.classList.add("slide-in"); aEl.classList.add("slide-in");
+
+    qEl.innerText = q.q;
+    aEl.innerHTML = "";
+
+    q.a.forEach((text, i) => {
+        let btn = document.createElement("button");
+        btn.className = "answer";
+        btn.innerText = text;
+        btn.onclick = () => select(i);
+        aEl.appendChild(btn);
+    });
+
+    startTimer();
+}
+
+function select(selectedIndex){
+    clearInterval(timer);
+    let q = quiz[index];
+    let btns = document.querySelectorAll(".answer");
+
+    btns.forEach((b, k) => {
+        b.disabled = true; // Khóa click
+        if(k === q.c) b.classList.add("correct"); // Luôn bôi xanh đáp án đúng
+        if(k === selectedIndex && k !== q.c) b.classList.add("wrong"); // Bôi đỏ nếu chọn sai
+    });
+
+    if(selectedIndex === q.c){
+        score++;
+        correctSound.play();
+        increaseTotal();
+    } else {
+        wrongSound.play();
+    }
+
+    document.getElementById("next").style.display = "block";
+}
+
+document.getElementById("next").onclick = () => {
+    index++;
+    document.getElementById("next").style.display = "none";
+
+    if(index < quiz.length){
+        load();
+    } else {
+        finish();
+    }
+}
+
+function startTimer(){
+    time = 15;
+    let timerEl = document.getElementById("timer");
+    timerEl.innerText = "⏱ " + time;
+    timerEl.style.color = "#ffeb3b"; // Reset màu
+
+    timer = setInterval(() => {
+        time--;
+        timerEl.innerText = "⏱ " + time;
+        
+        if(time <= 5) timerEl.style.color = "#ff5252"; // Đổi màu cảnh báo khi sắp hết giờ
+
+        if(time <= 0){
+            clearInterval(timer);
+            wrongSound.play(); // Hết giờ tính là sai
+            
+            // Tự động khóa và hiển thị đáp án đúng
+            let btns = document.querySelectorAll(".answer");
+            btns.forEach((b, k) => {
+                b.disabled = true;
+                if(k === quiz[index].c) b.classList.add("correct");
+            });
+
+            document.getElementById("next").style.display = "block";
+        }
+    }, 1000);
+}
+
+function finish(){
+    document.getElementById("progressBar").style.width = "100%";
+    let percent = score / quiz.length;
+    let msg = "";
+    if (percent === 1) msg = "Đỉnh chóp! Thiên tài xuất chúng! 🌟";
+    else if (percent >= 0.7) msg = "Quá giỏi! Trình độ thật đáng nể! 👏";
+    else if (percent >= 0.5) msg = "Làm tốt lắm, nhưng cố xíu nữa nha! 👍";
+    else msg = "Học tài thi phận, lần sau làm lại nhé! 😢";
+
+    document.getElementById("game").innerHTML = `
+        <h2 class="slide-in">🎉 Hoàn thành xuất sắc</h2>
+        <div class="stat slide-in" style="font-size: 20px; margin: 20px 0;">Điểm của bạn: <span>${score}/${quiz.length}</span></div>
+        <h3 class="slide-in" style="color: #ffeb3b;">${msg}</h3>
+        <button class="slide-in" onclick="location.reload()" style="background: linear-gradient(45deg, #11998e, #38ef7d); margin-top: 20px;">🎮 Chơi lại ngay</button>
+    `;
+    saveScore();
+}
+
+// --- DỮ LIỆU LOCAL STORAGE ---
+function increaseTotal(){
+    let total = Number(localStorage.getItem("totalCorrect") || 0);
+    total++;
+    localStorage.setItem("totalCorrect", total);
+    document.getElementById("totalCorrect").innerText = total;
+}
+
+function loadTotal(){
+    document.getElementById("totalCorrect").innerText = Number(localStorage.getItem("totalCorrect") || 0);
+}
+
+function saveScore(){
+    if(score === 0) return; // Không lưu nếu 0 điểm cho đỡ rác bảng
+    let data = JSON.parse(localStorage.getItem("rank") || "[]");
+    data.push({ name: player, score: score, date: new Date().toLocaleDateString() });
+    
+    // Sắp xếp giảm dần theo điểm
+    data.sort((a, b) => b.score - a.score);
+    data = data.slice(0, 5); // Chỉ lấy top 5 cho đẹp
+    localStorage.setItem("rank", JSON.stringify(data));
+}
+
+function showRank(){
+    let data = JSON.parse(localStorage.getItem("rank") || "[]");
+    let div = document.getElementById("ranking");
+    div.innerHTML = "";
+
+    if (data.length === 0) {
+        div.innerHTML = "<div style='text-align:center; color:#aaa; font-style:italic;'>Chưa có ai chơi cả, hãy là người đầu tiên!</div>";
+        return;
+    }
+
+    data.forEach((p, i) => {
+        let rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+        let medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🎗️';
+        div.innerHTML += `
+            <div class="rank-item">
+                <span class="${rankClass}">${medal} ${p.name}</span>
+                <span style="color: #00d2ff; font-weight: bold;">${p.score} điểm</span>
+            </div>
+        `;
+    });
+}
+
+// Chạy khởi tạo ban đầu
+loadTotal();
+showRank();
+
+</script>
+</body>
+</html>
