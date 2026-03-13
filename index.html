@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Lớp 6 ULTRA VIP PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+    
+    body {
+        background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #b21f1f, #fdbb2d);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    /* Hiệu ứng nền động */
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Khối lơ lửng background */
+    .shape {
+        position: absolute; filter: blur(3px); opacity: 0.4;
+        animation: float 6s ease-in-out infinite; z-index: 0;
+    }
+    .shape-1 { width: 100px; height: 100px; background: #00d2ff; border-radius: 50%; top: 10%; left: 10%; animation-duration: 8s; }
+    .shape-2 { width: 150px; height: 150px; background: #38ef7d; border-radius: 30%; bottom: 20%; right: 10%; animation-duration: 10s; }
+    .shape-3 { width: 80px; height: 80px; background: #f5af19; border-radius: 50%; top: 40%; right: 20%; animation-duration: 7s; }
+
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(20deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    /* Container Glassmorphism */
+    .container {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+        padding: 40px 30px;
+        border-radius: 24px;
+        width: 750px;
+        max-width: 95%;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+    }
+
+    h2 { color: #00d2ff; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,210,255,0.5); }
+    h3 { font-weight: 600; margin: 20px 0; font-size: 20px; }
+
+    /* Input & Select */
+    input, select {
+        width: 100%; padding: 15px; border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.3); color: white;
+        margin-bottom: 15px; font-size: 16px; outline: none; text-align: center;
+        transition: all 0.3s ease;
+    }
+    input:focus, select:focus { border-color: #00d2ff; background: rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(0,210,255,0.3); }
+    select option { background: #203a43; color: white; }
+
+    /* Buttons */
+    button {
+        width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px;
+        cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative; overflow: hidden;
+    }
+    button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    button:active:not(:disabled) { transform: translateY(1px); }
+
+    .btn-subject { background: linear-gradient(135deg, #11998e, #38ef7d); border: none; box-shadow: 0 4px 15px rgba(17,153,142,0.4); }
+    .btn-subject:nth-child(2) { background: linear-gradient(135deg, #2980B9, #6DD5FA); box-shadow: 0 4px 15px rgba(41,128,185,0.4); }
+    .btn-subject:nth-child(3) { background: linear-gradient(135deg, #8E2DE2, #4A00E0); box-shadow: 0 4px 15px rgba(142,45,226,0.4); }
+
+    /* Trạng thái đáp án */
+    .correct { background: linear-gradient(45deg, #00b09b, #96c93d) !important; color: white !important; border: 2px solid #fff !important; animation: pop 0.4s; }
+    .wrong { background: linear-gradient(45deg, #ff416c, #ff4b2b) !important; color: white !important; animation: shake 0.4s; opacity: 0.9; }
+    .hidden-ans { opacity: 0 !important; visibility: hidden; transition: 0.3s; }
+
+    /* Nút Next */
+    #next { background: linear-gradient(45deg, #f12711, #f5af19); display: none; margin-top: 25px; box-shadow: 0 5px 20px rgba(241,39,17,0.5); font-size: 18px; }
+
+    /* Thanh thông tin */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .hud { background: rgba(0,0,0,0.4); padding: 8px 15px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); }
+    #timer { color: #38ef7d; font-size: 20px; transition: color 0.3s; }
+    #streakDisplay { color: #f5af19; display: none; animation: pop 0.3s; }
+
+    /* Quyền trợ giúp */
+    .lifelines { display: flex; gap: 10px; margin-bottom: 20px; }
+    .lifeline-btn { flex: 1; padding: 10px; font-size: 14px; background: linear-gradient(45deg, #3a7bd5, #3a6073); border-radius: 10px; }
+    .lifeline-btn:disabled { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Bảng xếp hạng */
+    .rank-board { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 16px; margin-top: 15px; }
+    .rank-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; transition: 0.3s; border-radius: 8px; }
+    .rank-item:hover { background: rgba(255,255,255,0.1); padding-left: 20px; }
+    .rank-1 { color: #FFD700; font-weight: 800; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+    .rank-2 { color: #C0C0C0; font-weight: bold; }
+    .rank-3 { color: #CD7F32; font-weight: bold; }
+
+    /* Progress Bar */
+    .progress-container { width: 100%; background: rgba(255,255,255,0.1); height: 10px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(0,210,255,0.5); }
+
+    /* Mute Button */
+    #muteBtn { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; position: absolute; top: 20px; right: 20px; display: flex; justify-content: center; align-items: center; z-index: 100; transition: 0.3s; }
+    #muteBtn:hover { background: rgba(255,255,255,0.2); }
+
+    /* Animations */
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pop { 0% { transform: scale(0.9); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+    .animate-in { animation: slideUp 0.5s forwards cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; }
+    .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="shape shape-1"></div>
+<div class="shape shape-2"></div>
+<div class="shape shape-3"></div>
+
+<div class="container animate-in">
+    <button id="muteBtn" onclick="toggleMute()" title="Bật/Tắt Âm Thanh">🔊</button>
+    
+    <div id="menu">
+        <h2>🔥 ULTRA VIP PRO 🔥</h2>
+        <div class="hud" style="display:inline-block; margin-bottom: 20px;">
+            Tổng câu đúng vĩnh viễn: <span id="totalCorrect" style="color:#00d2ff;">0</span>
+        </div>
+
+        <input id="player" placeholder="Nhập tên siêu ngầu của bạn..." maxlength="20">
+        <select id="difficulty">
+            <option value="1">Độ khó: Dễ (20s / câu)</option>
+            <option value="2" selected>Độ khó: Vừa (15s / câu)</option>
+            <option value="3">Độ khó: Siêu Khó (10s / câu)</option>
+        </select>
+        
+        <h3>🚀 Chọn Nhiệm Vụ 🚀</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn-subject" onclick="startGame('math')">🧮 Toán Học (Auto 4 Phép Tính)</button>
+            <button class="btn-subject" onclick="startGame('english')">🇬🇧 Tiếng Anh (Từ vựng & Ngữ pháp)</button>
+            <button class="btn-subject" onclick="startGame('science')">🔬 Khoa Học Tự Nhiên</button>
+        </div>
+
+        <h3 style="margin-top: 35px;">🏆 BẢNG PHONG THẦN 🏆</h3>
+        <div class="rank-board" id="ranking"></div>
+    </div>
+
+    <div id="game" style="display:none">
+        <div class="top-bar">
+            <div class="hud" id="questionCount">Câu 1/10</div>
+            <div class="hud" id="streakDisplay">🔥 Combo: x1</div>
+            <div class="hud" id="timer">⏱ 15s</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="lifelines">
+            <button class="lifeline-btn" id="btn5050" onclick="use5050()">☯️ 50/50</button>
+            <button class="lifeline-btn" id="btnTime" onclick="useTimeBoost()">⏳ +10s</button>
+        </div>
+
+        <h3 id="question" style="font-size: 24px; min-height: 70px; display: flex; align-items: center; justify-content: center;"></h3>
+        <div id="answers"></div>
+        
+        <button id="next">Tiếp Tục ⏩</button>
+    </div>
+</div>
+
+<script>
+// --- CẤU HÌNH ÂM THANH ---
+const sounds = {
+    correct: new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b8b2c.mp3"),
+    wrong: new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_8c8f5b84de.mp3"),
+    win: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3"),
+    click: new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b7cb6256.mp3")
+};
+
+let isMuted = localStorage.getItem("isMuted") === "true";
+updateMuteUI();
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem("isMuted", isMuted);
+    updateMuteUI();
+}
+
+function updateMuteUI() {
+    Object.values(sounds).forEach(s => s.muted = isMuted);
+    document.getElementById("muteBtn").innerText = isMuted ? "🔇" : "🔊";
+}
+
+function playSound(type) {
+    if (!isMuted) {
+        sounds[type].currentTime = 0;
+        sounds[type].play().catch(e => console.log("Audio play prevented by browser"));
+    }
+}
+
+// --- NGÂN HÀNG CÂU HỎI VIP ---
+function generateMath() {
+    let arr = [];
+    const ops = ['+', '-', '*', '/'];
+    for(let i=0; i<150; i++){
+        let op = ops[Math.floor(Math.random() * ops.length)];
+        let a, b, correct;
+        
+        if (op === '+') { a = rand(1, 50); b = rand(1, 50); correct = a + b; }
+        else if (op === '-') { a = rand(20, 100); b = rand(1, a-1); correct = a - b; } // Không ra số âm
+        else if (op === '*') { a = rand(2, 15); b = rand(2, 12); correct = a * b; }
+        else if (op === '/') { b = rand(2, 12); correct = rand(2, 15); a = b * correct; } // Luôn chia hết
+
+        arr.push({ 
+            q: `${a} ${op} ${b} = ?`, 
+            correctAns: correct.toString(), 
+            wrongAns: [(correct+rand(1,5)).toString(), (correct-rand(1,3)).toString(), (correct+rand(6,10)).toString()] 
+        });
+    }
+    return arr;
+}
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+const rawBank = {
+    math: generateMath(),
+    english: [
+        { q: "Từ nào khác loại với các từ còn lại?", correctAns: "Run", wrongAns: ["Apple", "Banana", "Orange"] },
+        { q: "Quá khứ của 'Go' là gì?", correctAns: "Went", wrongAns: ["Goed", "Gone", "Going"] },
+        { q: "'Beautiful' là loại từ gì?", correctAns: "Tính từ", wrongAns: ["Danh từ", "Động từ", "Trạng từ"] },
+        { q: "I ___ a student.", correctAns: "am", wrongAns: ["is", "are", "be"] },
+        { q: "Nghĩa của từ 'Environment'?", correctAns: "Môi trường", wrongAns: ["Giáo dục", "Sức khỏe", "Giao thông"] },
+        { q: "Thủ đô của nước Anh là gì?", correctAns: "London", wrongAns: ["Paris", "New York", "Berlin"] },
+        { q: "Từ trái nghĩa với 'Hot' là?", correctAns: "Cold", wrongAns: ["Warm", "Cool", "Boiling"] },
+        { q: "She ___ to school every day.", correctAns: "goes", wrongAns: ["go", "going", "went"] },
+        { q: "Số 100 trong tiếng Anh viết là?", correctAns: "One hundred", wrongAns: ["One thousand", "Ten zero", "Hundred one"] },
+        { q: "Nghĩa của cụm 'Look after'?", correctAns: "Chăm sóc", wrongAns: ["Tìm kiếm", "Nhìn thấy", "Khinh thường"] }
+    ],
+    science: [
+        { q: "Cơ quan nào bơm máu đi khắp cơ thể?", correctAns: "Tim", wrongAns: ["Phổi", "Não", "Dạ dày"] },
+        { q: "Lực nào giữ chúng ta trên mặt đất?", correctAns: "Trọng lực", wrongAns: ["Lực từ", "Lực ma sát", "Lực cản"] },
+        { q: "Nước sôi ở bao nhiêu độ C?", correctAns: "100", wrongAns: ["50", "90", "120"] },
+        { q: "Động vật nào đẻ trứng?", correctAns: "Chim cánh cụt", wrongAns: ["Cá heo", "Dơi", "Chó"] },
+        { q: "Khí nào chiếm tỷ lệ lớn nhất trong khí quyển?", correctAns: "Nitơ", wrongAns: ["Oxy", "CO2", "Hydro"] },
+        { q: "Hệ mặt trời có mấy hành tinh?", correctAns: "8", wrongAns: ["7", "9", "10"] },
+        { q: "Vật liệu nào dẫn điện tốt nhất?", correctAns: "Bạc", wrongAns: ["Đồng", "Nhôm", "Vàng"] },
+        { q: "Chu kỳ Trái Đất quay quanh Mặt Trời?", correctAns: "365.25 ngày", wrongAns: ["24 giờ", "30 ngày", "360 ngày"] },
+        { q: "Vitamin nào tổng hợp nhờ ánh nắng?", correctAns: "Vitamin D", wrongAns: ["Vitamin A", "Vitamin C", "Vitamin B"] },
+        { q: "Bộ phận nào của cây làm nhiệm vụ quang hợp?", correctAns: "Lá", wrongAns: ["Rễ", "Thân", "Hoa"] }
+    ]
+};
+
+// --- BIẾN TOÀN CỤC & STATE ---
+let gameState = {
+    quiz: [], currentIndex: 0, score: 0, combo: 1, 
+    timeLimit: 15, currentTime: 15, timerId: null,
+    used5050: false, usedTimeBoost: false,
+    playerName: ""
+};
+
+// Khôi phục tên người chơi
+document.getElementById("player").value = localStorage.getItem("lastPlayer") || "";
+
+// --- LOGIC GAME ---
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function startGame(subject) {
+    playSound('click');
+    gameState.playerName = document.getElementById("player").value.trim() || "Ẩn Danh VIP";
+    localStorage.setItem("lastPlayer", gameState.playerName);
+
+    // Xử lý độ khó
+    let diff = document.getElementById("difficulty").value;
+    gameState.timeLimit = diff == "1" ? 20 : (diff == "2" ? 15 : 10);
+
+    // Chuẩn bị 10 câu hỏi ngẫu nhiên
+    let rawQ = shuffle([...rawBank[subject]]).slice(0, 10);
+    gameState.quiz = rawQ.map(item => {
+        let options = shuffle([item.correctAns, ...item.wrongAns]);
+        return { q: item.q, a: options, c: options.indexOf(item.correctAns) };
+    });
+
+    // Reset State
+    gameState.currentIndex = 0;
+    gameState.score = 0;
+    gameState.combo = 1;
+    gameState.used5050 = false;
+    gameState.usedTimeBoost = false;
+    
+    document.getElementById("btn5050").disabled = false;
+    document.getElementById("btnTime").disabled = false;
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    
+    renderQuestion();
+}
+
+function renderQuestion() {
+    let q = gameState.quiz[gameState.currentIndex];
+    
+    // UI Update
+    document.getElementById("questionCount").innerText = `Câu ${gameState.currentIndex + 1}/${gameState.quiz.length}`;
+    document.getElementById("progressBar").style.width = `${((gameState.currentIndex) / gameState.quiz.length) * 100}%`;
+    document.getElementById("streakDisplay").innerText = `🔥 Combo: x${gameState.combo}`;
+    document.getElementById("streakDisplay").style.display = gameState.combo > 1 ? "inline-block" : "none";
+    
+    // Animations
+    let qEl = document.getElementById("question");
+    let aEl = document.getElementById("answers");
+    qEl.className = "animate-in";
+    aEl.className = "animate-in delay-1";
+    
+    qEl.innerText = q.q;
+    aEl.innerHTML = "";
+
+    q.a.forEach((text, i) => {
+        let btn = document.createElement("button");
+        btn.className = "answer-btn";
+        btn.innerText = text;
+        btn.onclick = () => selectAnswer(i, btn);
+        aEl.appendChild(btn);
+    });
+
+    document.getElementById("next").style.display = "none";
+    startTimer();
+}
+
+function selectAnswer(selectedIndex, btnElement) {
+    clearInterval(gameState.timerId);
+    let q = gameState.quiz[gameState.currentIndex];
+    let btns = document.querySelectorAll(".answer-btn");
+
+    // Khóa tất cả nút
+    btns.forEach((b, k) => {
+        b.disabled = true;
+        if(k === q.c) b.classList.add("correct");
+        if(k === selectedIndex && k !== q.c) b.classList.add("wrong");
+    });
+
+    if(selectedIndex === q.c) {
+        // Trả lời đúng
+        playSound('correct');
+        let timeBonus = gameState.currentTime;
+        gameState.score += (100 + (timeBonus * 5)) * gameState.combo;
+        gameState.combo++;
+        increaseTotalLifetime();
+    } else {
+        // Trả lời sai
+        playSound('wrong');
+        gameState.combo = 1;
+    }
+
+    showNextButton();
+}
+
+function showNextButton() {
+    let nextBtn = document.getElementById("next");
+    nextBtn.style.display = "block";
+    nextBtn.className = "animate-in delay-1";
+    nextBtn.onclick = () => {
+        playSound('click');
+        gameState.currentIndex++;
+        if(gameState.currentIndex < gameState.quiz.length) {
+            renderQuestion();
+        } else {
+            endGame();
+        }
+    }
+}
+
+// --- HỆ THỐNG TIMING ---
+function startTimer() {
+    gameState.currentTime = gameState.timeLimit;
+    updateTimerUI();
+    
+    gameState.timerId = setInterval(() => {
+        gameState.currentTime--;
+        updateTimerUI();
+        
+        if(gameState.currentTime <= 0) {
+            clearInterval(gameState.timerId);
+            playSound('wrong');
+            gameState.combo = 1; // Mất combo
+            
+            // Tự động chọn sai
+            let btns = document.querySelectorAll(".answer-btn");
+            btns.forEach((b, k) => {
+                b.disabled = true;
+                if(k === gameState.quiz[gameState.currentIndex].c) b.classList.add("correct");
+            });
+            showNextButton();
+        }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    let tEl = document.getElementById("timer");
+    tEl.innerText = `⏱ ${gameState.currentTime}s`;
+    if (gameState.currentTime <= 5) {
+        tEl.style.color = "#ff4b2b";
+        tEl.style.textShadow = "0 0 10px rgba(255,75,43,0.8)";
+        if(gameState.currentTime % 2 !== 0) tEl.style.transform = "scale(1.1)";
+        else tEl.style.transform = "scale(1)";
+    } else {
+        tEl.style.color = "#38ef7d";
+        tEl.style.textShadow = "none";
+        tEl.style.transform = "scale(1)";
+    }
+}
+
+// --- QUYỀN TRỢ GIÚP ---
+function use5050() {
+    if(gameState.used5050) return;
+    playSound('click');
+    gameState.used5050 = true;
+    document.getElementById("btn5050").disabled = true;
+    
+    let q = gameState.quiz[gameState.currentIndex];
+    let btns = document.querySelectorAll(".answer-btn");
+    let wrongIndexes = [];
+    
+    for(let i=0; i<4; i++) { if(i !== q.c) wrongIndexes.push(i); }
+    wrongIndexes = shuffle(wrongIndexes); // Lấy ngẫu nhiên 2 đáp án sai
+    
+    btns[wrongIndexes[0]].classList.add("hidden-ans");
+    btns[wrongIndexes[1]].classList.add("hidden-ans");
+    btns[wrongIndexes[0]].disabled = true;
+    btns[wrongIndexes[1]].disabled = true;
+}
+
+function useTimeBoost() {
+    if(gameState.usedTimeBoost) return;
+    playSound('click');
+    gameState.usedTimeBoost = true;
+    document.getElementById("btnTime").disabled = true;
+    gameState.currentTime += 10;
+    updateTimerUI();
+}
+
+// --- KẾT THÚC GAME & XẾP HẠNG ---
+function endGame() {
+    document.getElementById("progressBar").style.width = "100%";
+    
+    let isWin = gameState.score > 2000; // Mốc điểm tương đối
+    if(isWin) {
+        playSound('win');
+        triggerConfetti();
+    }
+
+    document.getElementById("game").innerHTML = `
+        <h2 class="animate-in">🎉 KẾT QUẢ TRẬN ĐẤU 🎉</h2>
+        <div class="animate-in delay-1" style="background:rgba(0,0,0,0.3); padding:20px; border-radius:15px; margin:20px 0;">
+            <div style="font-size:18px; color:#aaa;">Hồ sơ: <span style="color:white; font-weight:bold;">${gameState.playerName}</span></div>
+            <div style="font-size:28px; font-weight:900; color:#00d2ff; margin:10px 0;">ĐIỂM: ${gameState.score}</div>
+        </div>
+        <h3 class="animate-in delay-2" style="color: #f5af19;">${isWin ? "Thiên tài xuất chúng! Siêu cấp VIP PRO! 🌟" : "Cố gắng lên, làm lại nhé! 💪"}</h3>
+        <button class="animate-in delay-3" onclick="location.reload()" style="background: linear-gradient(135deg, #11998e, #38ef7d); margin-top: 20px; font-size:18px; padding:15px;">🎮 CHƠI LẠI NGAY</button>
+    `;
+    saveRanking();
+}
+
+function triggerConfetti() {
+    var duration = 3 * 1000;
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+    var interval = setInterval(function() {
+        var timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        var particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+}
+
+// --- LOCAL STORAGE DATA ---
+function increaseTotalLifetime() {
+    let total = Number(localStorage.getItem("totalCorrectVip") || 0) + 1;
+    localStorage.setItem("totalCorrectVip", total);
+    document.getElementById("totalCorrect").innerText = total;
+}
+
+function saveRanking() {
+    if(gameState.score === 0) return;
+    let data = JSON.parse(localStorage.getItem("rankVipPro") || "[]");
+    data.push({ name: gameState.playerName, score: gameState.score, date: new Date().toLocaleDateString() });
+    data.sort((a, b) => b.score - a.score);
+    data = data.slice(0, 5); // Lưu top 5
+    localStorage.setItem("rankVipPro", JSON.stringify(data));
+}
+
+function showRanking() {
+    let data = JSON.parse(localStorage.getItem("rankVipPro") || "[]");
+    let div = document.getElementById("ranking");
+    
+    if (data.length === 0) {
+        div.innerHTML = "<div style='color:#aaa; font-style:italic;'>Chưa có cao thủ nào. Hãy chiếm Top 1 ngay!</div>";
+        return;
+    }
+
+    div.innerHTML = data.map((p, i) => {
+        let cls = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+        let icon = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🎖️';
+        return `
+            <div class="rank-item">
+                <span class="${cls}">${icon} ${p.name}</span>
+                <span style="color: #00d2ff; font-weight: bold;">${p.score} pt</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Chạy khởi tạo
+document.getElementById("totalCorrect").innerText = Number(localStorage.getItem("totalCorrectVip") || 0);
+showRanking();
+
+</script>
+</body>
+</html>
